@@ -1,44 +1,148 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
-<mapper namespace="mapper.board">
-	<insert id="insertBoard" parameterType="Board" useGeneratedKeys="true" keyProperty="num">
-	<!-- db에서 auto increment 글번호 해줬는데, 그 생성된 번호를 갖고와야하는경우도있음.
-	상세페이지 이동할때 boardnum만으로 조회할수있다. 
-	parameterType="Board" useGeneratedKeys="true" keyProperty="num"
-	
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="mapper.board">
+ 
+ 
+ 	<!-- 1. 게시글 작성 -->
+ 	<insert id="insertBoard" parameterType="Board" useGeneratedKeys="true" keyProperty="num">
+ 	<!-- cf. 서블릿이 화면으로부터 데이터를 받아서 dto객체에 담았을때는 num을 setter로 할당해준적이 없고, DB쪽에서는 num컬럼이 auto_increment하도록 되어있다.
+ 	
+ 	1) useGeneratedKeys와 keyProperty를 사용하는 경우
+ 	DB에 인서트될때 auto_increment로 삽입되는 num값이 Board객체의 num에 자동으로(쉽게,바로) 삽입되므로 바로 사용 가능
+ 	ex. 글 작성 후 바로 글 조회 페이지로 넘어갈때 num값을 별도로 받아오지 않고 객체에 담겨있는 값으로 바로 활용 가능 (서블릿 BoardWrite.java의 응답페이지 위임 코드 참고)
+ 	
+ 	2) useGeneratedKeys와 keyProperty를 사용하지 않는 경우
+ 	DB에는 auto_increment되어 num값이 삽입되지만 객체Board의 필드num에는 할당되지 않음(마이바티스가 자동으로 가져오지 않음)
+ 	 -->
+ 	 
+ 		<![CDATA[
+ 			INSERT INTO BOARD (SUBJECT, CONTENT, WRITEDATE, FILEURL, WRITER) VALUES (#{subject}, #{content}, curdate(), #{fileurl}, #{writer})
+ 		]]>
+ 	</insert>
+ 	
+ 	
+ 	
+ 	<!-- 2-1. 게시글 목록 -->
+ 	<select id="selectBoardList" parameterType="Integer" resultType="Board">
+ 		<![CDATA[
+ 			select * from board order by num desc
+ 			limit #{row},10
+ 		]]>
+ 	
+ 	</select>
+ 	<!-- 몇번째(시작행번호)부터 10개씩 보여지게할지의 몇번째#{row}는 서비스에서 계산한다 (페이지 처리에 대한 계산은 서비스가 수행)
+ 	
+ 	cf.  DB에서는 유일하게 예외적으로 LIMIT으로 값을 불러올 때는 0부터 시작함
+ 	-->
+ 	
+ 	
+ 	<!-- 2-2. 페이징 처리를 위해 전체 데이터 개수를 알아야함 (전체 행의 개수를 알아야 전체 페이지를 얻을 수 있음) -->
+ 	<select id="selectBoardCount" resultType="Integer">
+ 		<![CDATA[
+ 			select count(num) from board
+ 		]]>
+ 	</select>
+ 	
+ 	
+ 	
+ 	<!-- 3. 게시글 상세 -->
+ 	<select id="selectBoard" parameterType="Integer" resultType="Board">
+ 		<![CDATA[
+ 			select * from board where num=#{num}
+ 		]]>
+ 	</select>
+ 	
+ 	<!-- cf.
+ 	parameterType이 객체(Board 등)라면 #{num}은 필드명을 가리키고, 
+ 	parameterType이 Integer와 같은 타입이라면, dao 메소드의 파라미터명을 가리킨다.
+ 	
+ 	따라서 위와 같이 parameterType="Integer"일때는 dao의 메소드를 만들때 파라미터명을 매퍼sql문의 #{num}과 맞춰줘야함 -->
+ 	
+ 	
+ 	
+ 	
+ 	<!-- 4. 게시글 수정 -->
+ 	<update id="updateBoard" parameterType="Board" useGeneratedKeys="true" keyProperty="num">
+ 		update board
+ 		<trim prefix="SET" suffixOverrides=",">
+ 			<if test="subject != null">subject=#{subject},</if>
+ 			<if test="content != null">content=#{content},</if>
+ 			<if test="fileurl != null">fileurl=#{fileurl},</if>
+ 		</trim>
+ 		where num=#{num}
+ 	</update>
+ 	<!-- 
+ 	if문: Board안의 subject/content/fileurl이 null이 아닌것만 업데이트되도록 함
+ 	trim: 마지막 콤마는 빼도록 해주기 위함
+ 	prefix: 맨 앞에 set을 붙이도록 함
+ 	suffixOverrides: 마지막 ","를 지우도록 함(cf. suffixOverrides은 <trim> 문에 의해 생성되는 SQL 구문 가장 뒤에 해당하는 문자가 있으면 자동으로 지워줌)
+ 	
+ 	
+ 	cf.
+ 	<trim> 요소는 원하는 변경사항만 적도록 도와주며, 필요하지 않은 내용을 추가하지 않습니다. 
+ 	이렇게 하면 업데이트 문이 정확하고 깔끔하게 유지됩니다. 
+ 	ex. 제목만 변경하려면 "subject=newSubject"와 같이 적어주게함
+ 	 -->
+ 	
+ 	
+ 	
+ 	<!-- 5. 게시글 삭제 -->
+ 	<delete id="deleteBoard" parameterType="Integer">
+ 		<![CDATA[
+ 			delete from board where num=#{num}
+ 		]]>
+ 	</delete>
+ 	
+ 	
+ 	
+ 	<!-- 6-1. 게시글 검색 목록 -->
+ 	<!-- 
+ 	<select id="searchBoardList" parameterType="hashMap" resultType="Board">
+	    <![CDATA[
+	    select * from board
+	    where ${type} like '%${keyword}%'
+	    limit ${row}, 10
+	    ]]>
+	</select>
+ 	-->
+ 	<!-- 
+ 	SELECT * FROM board WHERE subject LIKE '%가%';
+	SELECT * FROM board WHERE content LIKE '%가%';
+	SELECT * FROM board WHERE writer LIKE '%김%';
+	id를 각각 가지는 쿼리태그를 각각 만들수도 있지만 하나로 만들고 파라미터를 이용할 수 있다.(subject인지 content인지 writer인지를 ${type}로 구별)
+	이때 쿼리문의 wehre절에서 컬럼명에는 작은따옴표를 붙이지않도록 해야하므로 #{type}이 아니라 ${type}으로 작성하는것이다. (쿼리문에서 값이 문자열일때는 따옴표가 붙어야하지만 컬럼명에는 붙으면 안됨)
+	cf. #{}의 경우에는 파라미터값이 문자열일때는 자동으로 따옴표가 붙는다.(파라미터값이 숫자일때는 따옴표가 붙지 않음)
+ 	
+ 	이전에는 parameterType이 객체Board이거나 Integer같은것이었는데
+ 	parameterType을 Map으로 하면 마이바티스가 알아서 컬럼명을 키로 실제데이터를 벨류로 하여 가져온다 
+ 	-->
+ 	
+ 	<!-- 6-2. 게시글 검색시 페이징처리에 필요한 전체행의 수 -->
+ 	<!-- 
+ 	<select id="searchBoardCount" parameterType="hashMap" resultType="Integer">
+	    <![CDATA[
+	    select count(${type}) from board
+	    where ${type} like '%${keyword}%'
+	    ]]>
+	</select>
 	 -->
-		<![CDATA[
-		 insert into board (subject,content,writedate,fileurl,writer) values 
-		(#{subject},#{content},curdate(),#{fileurl},#{writer})
-		]]>
-	</insert>
 	
-	<select id="selectBoard" parameterType="Integer" resultType="Board">
-	 
-	 <![CDATA[
-	 	select * from board order by num desc
-	 	limit #{row},10
-	 	
-	 ]]>
-	 <!-- 0번째부터 10개씩 보여주기, 페이지 처리는 service에서 하기 -->
-	 
+	<!-- 
+	선생님 코드는 아래 부분이 다르게 작성됨
+	1. limit #{row}, 10
+	2. select count(*) from board
+	 -->
+ 	<!-- 7-1. 게시글 검색 목록 -->
+ 	<select id="searchBoardList" parameterType="hashMap" resultType="Board">
+	    select * from board
+	    where ${type} like '%${keyword}%' order by num desc
+	    limit #{row}, 10
 	</select>
-	
-	<select id="selectBoardCount" resultType="Integer">
-		<![CDATA[
-			select count(num) from board
-		]]>
-	
+	<!-- 7-2. 게시글 검색시 페이징처리에 필요한 전체행의 수 -->
+ 	<select id="searchBoardCount" parameterType="hashMap" resultType="Integer">
+	    select count(*) from board
+	    where ${type} like '%${keyword}%'
 	</select>
-	<select id="selectBoardList" parameterType="Integer" resultType="Board">
-		<![CDATA[
-			select * from board order by num desc
-			limit #{row},10
-		]]>
-	
-	</select>
-	
-
-</mapper>
+ 	
+ </mapper>
