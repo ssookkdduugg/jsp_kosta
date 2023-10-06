@@ -144,5 +144,36 @@
 	    select count(*) from board
 	    where ${type} like '%${keyword}%'
 	</select>
+	
+	
+	
+	<!-- 조회수 업데이트 -->
+	<update id="updateBoardViewCount" parameterType="Integer">
+	<![CDATA[
+ 			update board set viewcount = viewcount+1 where num=#{num}
+ 		]]>
+	</update>
+	
+	
+	
+	
+	<!-- 좋아요 업데이트 -->
+	<select id="selectLikeCount" parameterType="Integer" resultType="Integer">
+	    select likecount from board where num=#{num}
+	</select>
+	
+	<update id="plusBoardLikeCount" parameterType="Integer">
+	<![CDATA[
+ 			update board set likecount = likecount+1 where num=#{num}
+ 		]]>
+	</update>
+	
+	<update id="minusBoardLikeCount" parameterType="Integer">
+	<![CDATA[
+ 			update board set likecount = likecount-1 where num=#{num}
+ 		]]>
+	</update>
+	
+	<!-- id 중복체크 -->
  	
  </mapper>

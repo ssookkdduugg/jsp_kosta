@@ -28,5 +28,12 @@ public class MemberServiceImpl implements MemberService {
 		memberDao.insertMember(member);
 		
 	}
+
+	@Override
+	public String idCheck(String id) throws Exception {
+		Member member = memberDao.selectMember(id);
+		if(member==null) return "notexist";
+		return "exist";
+	}
 	
 }

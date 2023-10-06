@@ -10,7 +10,7 @@ public class Board {
 	private String fileurl;
 	private String writer;
 	private  Integer  viewcount;
-	
+	private Integer likecount;
 	
 	
 	public Integer getNum() {
@@ -54,6 +54,12 @@ public class Board {
 	}
 	public void setViewcount(Integer viewcount) {
 		this.viewcount = viewcount;
+	}
+	public Integer getLikecount() {
+		return likecount;
+	}
+	public void setLikecount(Integer likecount) {
+		this.likecount = likecount;
 	}
 
 	

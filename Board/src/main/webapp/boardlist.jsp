@@ -29,8 +29,7 @@ table { margin: auto; width: 800px }
 <script>
 	function callBtn(num) {
 		var keyword= $("#keyword").val();
-		alert($("#keyword").val());
-		if($("#keyword").val()!=null) {
+		if(keyword!=null && keyword.trim()!='') {
 			$('#page').val(num);
 			$('#searchform').submit();
 		}

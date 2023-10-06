@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.simple.JSONObject;
+
 import dao.BoardDao;
 import dao.BoardDaoImpl;
 import dto.Board;
@@ -63,6 +65,7 @@ public class BoardServiceImpl implements BoardService {
 
 	@Override
 	public Board boardDetail(Integer num) throws Exception {
+		boardDao.updateBoardViewCount(num);
 		return boardDao.selectBoard(num);
 	}
 
@@ -149,6 +152,53 @@ public class BoardServiceImpl implements BoardService {
 		map.put("keyword", keyword);
 		
 		return map;
+	}
+
+	@Override
+	public String boardLike(String id, Integer num) throws Exception {
+		Map<String,Object> param = new HashMap<>();
+		param.put("id", id);
+		param.put("num", num);
+		//select * from boardlike where member_id=#{id} and board_num=#{num}
+		//xml에있던 {id},{num}이랑 이름 같아야함 
+		
+		//1. boardlike 테이블에 데이터 있는지확인(member_id,board_num확인하기) 
+		Integer likenum = boardDao.selectBoardLike(param);
+		
+		Map<String, Object> res = new HashMap<>();
+		
+		
+		if(likenum==null) {
+			boardDao.insertBoardLike(param); //없으면 boardlike에서 삽입 
+			boardDao.plusBoardLikeCount(num); //board 테이블에 좋아요수 감\ 
+			res.put("select", true);
+		}else { 
+			boardDao.deleteBoardLike(param); // boardlike에서 삭제 
+			boardDao.minusBoardLikeCount(num);//board 테이블에 좋아요수 감소
+			res.put("select", false);
+		}
+		
+		//3. board 테이블에 좋아요수 조정 (삭제했으면 -1, 삽입했으면 +1 )
+		//4. 좋아요 수 리턴 
+			Integer likecount = boardDao.selectLikeCount(num);
+			res.put("likecount", likecount);
+			
+			JSONObject jsonObj = new JSONObject(res);
+			return jsonObj.toJSONString();
+		
+		
+		
+		
+	}
+
+	@Override
+	public Boolean isBoardLike(String id, Integer num) throws Exception {
+		Map<String, Object> param = new HashMap<>();
+		param.put("id", id);
+		param.put("num", num);
+		Integer likenum = boardDao.selectBoardLike(param);
+		if(likenum==null)return false;
+		return true;
 	}	
 	
 	

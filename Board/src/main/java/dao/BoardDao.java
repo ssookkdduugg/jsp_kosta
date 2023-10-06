@@ -31,4 +31,21 @@ public interface BoardDao {
 	// 게시글 검색 선생님 코드
 	List<Board> searchBoardList(Map<String,Object> parammap) throws Exception;
 	Integer searchBoardCount(Map<String,Object> parammap) throws Exception;
+	
+	//좋아요 수 카운트하기 
+	void updateBoardViewCount(Integer num)throws Exception;
+	
+	//boardlike 관련된거 , 파라미터타입으로 member_id 랑 board_num 가져오기 
+	Integer selectBoardLike(Map<String, Object> param)throws Exception;
+	void insertBoardLike(Map<String, Object> param)throws Exception;
+	void deleteBoardLike(Map<String, Object> param)throws Exception;
+	
+	//boardlike 좋아요수 plus,minus
+	Integer selectLikeCount(Integer num)throws Exception;
+	void plusBoardLikeCount(Integer num)throws Exception;
+	void minusBoardLikeCount(Integer num)throws Exception;
+	
+	//id 중복체크 
+	
+	
 }

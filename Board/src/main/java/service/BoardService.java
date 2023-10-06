@@ -21,4 +21,11 @@ public interface BoardService {
 //	Map<String, Object> boardSearch(Map<String, Object> parammap) throws Exception; // 게시글 검색 내가 작성한 코드
 	Map<String, Object> boardSearch(String type, String keyword, Integer page) throws Exception; // 게시글 검색 선생님 코드
 	
+	
+	String boardLike(String id,Integer num)throws Exception;
+	
+	//내가 좋아요를 눌렀는지 여부 
+	Boolean isBoardLike(String id,Integer num)throws Exception;
+	
+	
 }

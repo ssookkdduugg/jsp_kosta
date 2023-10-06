@@ -77,5 +77,53 @@ public class BoardDaoImpl implements BoardDao {
 	public Integer searchBoardCount(Map<String,Object> parammap) throws Exception {
 		return sqlSession.selectOne("mapper.board.searchBoardCount", parammap);
 	}
+
+	@Override
+	public void updateBoardViewCount(Integer num) throws Exception {
+		sqlSession.update("mapper.board.updateBoardViewCount",num);
+		sqlSession.commit();
+		
+		
+	}
+
+	//boardlike테이블에 관련된거 
+	@Override
+	public Integer selectBoardLike(Map<String, Object> param) throws Exception {
+		return sqlSession.selectOne("mapper.boardlike.selectBoardLike",param);
+	}
+
+	@Override
+	public void insertBoardLike(Map<String, Object> param) throws Exception {
+		sqlSession.insert("mapper.boardlike.insertBoardLike",param);
+		sqlSession.commit();
+		
+	}
+
+	@Override
+	public void deleteBoardLike(Map<String, Object> param) throws Exception {
+		sqlSession.insert("mapper.boardlike.deleteBoardLike",param);
+		sqlSession.commit();
+	}
+
+	@Override
+	public void plusBoardLikeCount(Integer num) throws Exception {
+		sqlSession.update("mapper.board.plusBoardLikeCount",num);
+		sqlSession.commit();
+	}
+
+	@Override
+	public void minusBoardLikeCount(Integer num) throws Exception {
+		sqlSession.update("mapper.board.minusBoardLikeCount",num);
+		sqlSession.commit();
+		
+	}
+
+	@Override
+	public Integer selectLikeCount(Integer num) throws Exception {
+		
+		return sqlSession.selectOne("mapper.board.selectLikeCount",num);
+	}
+
+	
 	
 }

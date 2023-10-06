@@ -29,6 +29,8 @@ public class ImageView extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		//이미지뷰는 비동기 (뷰가 없는거)
+		//동기: 컨트롤러로 뷰에 위임해주는거 
 		request.setCharacterEncoding("utf-8");
 		String fileName = request.getParameter("file");
 		String filePath = request.getServletContext().getRealPath("upload")+"\\"+fileName;

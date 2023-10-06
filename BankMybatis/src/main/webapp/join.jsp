@@ -14,7 +14,7 @@
         .container {
             padding: 10px;
             border: 1px solid;
-            width: 280px;
+            width: 330px;
         }
 
         .header {
@@ -53,6 +53,7 @@
                 <div class="row">
                     <div class="title">아이디</div>
                     <div class="input"><input type="text" name="id"></div>
+                     <div class="input"><input type="button" id="checkid" value="중복"></div>
                 </div>
                 <div class="row">
                     <div class="title">이름</div>
